@@ -1,39 +1,57 @@
+from PIL import Image
+import sys
+
+
 def encrypt_decrypt_image(input_image, output_image, key):
-    img = Image.open(input_image)
-    pixels = img.load()
+    try:
+        img = Image.open(input_image)
+        img = img.convert("RGB")  # Ensure RGB mode
+        pixels = img.load()
 
-    width, height = img.size
+        width, height = img.size
 
-    for x in range(width):
-        for y in range(height):
-            r, g, b = pixels[x, y]
+        for x in range(width):
+            for y in range(height):
+                r, g, b = pixels[x, y]
 
-            # XOR operation with key
-            pixels[x, y] = (
-                r ^ key,
-                g ^ key,
-                b ^ key
-            )
+                pixels[x, y] = (
+                    r ^ key,
+                    g ^ key,
+                    b ^ key
+                )
 
-    img.save(output_image)
-    print(f"Operation completed! Saved as {output_image}")
+        img.save(output_image)
+        print(f"[✔] Operation completed! Saved as '{output_image}'")
+
+    except FileNotFoundError:
+        print("[✘] Error: Image file not found.")
+    except Exception as e:
+        print(f"[✘] Unexpected error: {e}")
 
 
 def main():
-    print("=== Image Encryption Tool ===")
+    print("=== Image Encryption / Decryption Tool ===")
     print("1. Encrypt Image")
     print("2. Decrypt Image")
 
-    choice = input("Choose an option (1/2): ")
+    choice = input("Choose an option (1/2): ").strip()
 
-    input_image = input("Enter image file name (with extension): ")
-    output_image = input("Enter output image name: ")
-    key = int(input("Enter encryption key (0–255): "))
+    if choice not in ("1", "2"):
+        print("[✘] Invalid choice!")
+        sys.exit()
 
-    if choice in ["1", "2"]:
-        encrypt_decrypt_image(input_image, output_image, key)
-    else:
-        print("Invalid choice!")
+    input_image = input("Enter input image file (with extension): ").strip()
+    output_image = input("Enter output image file name: ").strip()
+
+    try:
+        key = int(input("Enter encryption key (0–255): "))
+        if not (0 <= key <= 255):
+            raise ValueError
+    except ValueError:
+        print("[✘] Key must be an integer between 0 and 255.")
+        sys.exit()
+
+    encrypt_decrypt_image(input_image, output_image, key)
 
 
 if __name__ == "__main__":
